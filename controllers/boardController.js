@@ -1,5 +1,6 @@
 // Create a new board/canvas
 const boardService = require("../services/boardService");
+const userService = require("../services/userService");
 
 const createCanvas = async (req, res) => {
   try {
@@ -25,27 +26,84 @@ const updateCanvas = async (req, res) => {
 
 // Load a specific board/canvas by ID
 const loadCanvas = async (req, res) => {
-  // ...implementation...
+    try{
+        const canvasId = req.params.id;
+        const userId = req.user._id;
+
+        const board = await boardService.getBoardById(canvasId, userId);
+        if (!board) {
+            return res.status(404).json({ error: "Board not found" });
+        }
+        res.json(board);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to load board", details: err.message });
+    }
 };
 
 // Share a board/canvas with another user
 const shareCanvas = async (req, res) => {
-  // ...implementation...
+  try {
+    const canvasId = req.params.id;
+    const userId = req.user._id;
+    const { email } = req.body; 
+    if(!email){
+        return res.status(400).json({ error: "Email is required" });
+    }
+
+    const sharedUserId = await userService.getUserIdByEmail(email);
+    if(!sharedUserId){
+        return res.status(404).json({ error: "User not found with the provided email" });
+        // TODO: Handle case where user is not found
+    }
+
+    const sharedWith = { userId: sharedUserId, email };
+
+    const board = await boardService.shareBoard(canvasId, userId, sharedWith);
+    if (!board) {
+      return res.status(404).json({ error: "Board not found or not authorized" });
+    }
+
+    res.json({ message: "Board shared successfully", board });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to share board", details: err.message });
+  }
 };
 
 // Unshare a board/canvas from a user
 const unshareCanvas = async (req, res) => {
-  // ...implementation...
+    try{
+        const canvasId = req.params.id;
+        const userId = req.user._id;
+        const {email} = req.body;
+        if(!email){
+            return res.status(400).json({ error: "Email is required" });
+        }
+
+        const board = await boardService.unshareBoard(canvasId, userId, { email });
+        if (!board) {
+            return res.status(404).json({ error: "Board not found or not authorized" });
+        }
+
+        res.json({ message: "Board unshared successfully", board });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to unshare board", details: err.message });
+    }
 };
 
 // Delete a board/canvas
 const deleteCanvas = async (req, res) => {
-  // ...implementation...
-};
+  try {
+    const canvasId = req.params.id;
+    const userId = req.user._id;
 
-// Get all boards/canvases for the authenticated user
-const getUserCanvases = async (req, res) => {
-  // ...implementation...
+    const deletedBoard = await boardService.deleteBoard(canvasId, userId);
+    if (!deletedBoard) {
+      return res.status(404).json({ error: "Board not found or not authorized" });
+    }
+    res.json({ message: "Board deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete board", details: err.message });
+  }
 };
 
 // Real-time collaboration: join a board/canvas
@@ -70,7 +128,6 @@ module.exports = {
   shareCanvas,
   unshareCanvas,
   deleteCanvas,
-  getUserCanvases,
   joinCanvas,
   leaveCanvas,
   getActiveUsers,

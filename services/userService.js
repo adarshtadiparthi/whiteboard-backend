@@ -43,4 +43,9 @@ const getMe = async (userId) => {
   };
 };
 
-module.exports = { signup, signin, getMe };
+const getUserIdByEmail = async (email) => {
+    const user = await userRepo.findByEmail(email);
+    return user ? user._id : null;
+}
+
+module.exports = { signup, signin, getMe, getUserIdByEmail };
