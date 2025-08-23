@@ -23,4 +23,9 @@ const unshareBoard = async (boardId, userId, sharedWith) => {
     return board;
 }
 
-module.exports = { createBoard, getBoardById, deleteBoard, shareBoard , unshareBoard};
+const updateBoard = async (boardId, userId, updateData) => {
+    const board = await boardRepo.updateBoardById(boardId, userId, updateData);
+    return board;
+}
+
+module.exports = { createBoard, getBoardById, deleteBoard, shareBoard , unshareBoard, updateBoard };

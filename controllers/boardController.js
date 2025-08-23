@@ -19,18 +19,15 @@ const createCanvas = async (req, res) => {
   }
 };
 
-// Update an existing board/canvas
-const updateCanvas = async (req, res) => {
-  // ...implementation...
-};
-
 // Load a specific board/canvas by ID
 const loadCanvas = async (req, res) => {
     try{
         const canvasId = req.params.id;
         const userId = req.user._id;
+        // console.log(canvasId, userId);
 
         const board = await boardService.getBoardById(canvasId, userId);
+        // console.log(board);
         if (!board) {
             return res.status(404).json({ error: "Board not found" });
         }
@@ -92,34 +89,36 @@ const unshareCanvas = async (req, res) => {
 
 // Delete a board/canvas
 const deleteCanvas = async (req, res) => {
-  try {
-    const canvasId = req.params.id;
-    const userId = req.user._id;
+    try {
+        const canvasId = req.params.id;
+        const userId = req.user._id;
 
-    const deletedBoard = await boardService.deleteBoard(canvasId, userId);
-    if (!deletedBoard) {
-      return res.status(404).json({ error: "Board not found or not authorized" });
+        const deletedBoard = await boardService.deleteBoard(canvasId, userId);
+        if (!deletedBoard) {
+        return res.status(404).json({ error: "Board not found or not authorized" });
+        }
+        res.json({ message: "Board deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to delete board", details: err.message });
     }
-    res.json({ message: "Board deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to delete board", details: err.message });
-  }
 };
 
-// Real-time collaboration: join a board/canvas
-const joinCanvas = async (req, res) => {
-  // ...implementation...
-};
+const updateCanvas = async (req, res) => {
+    try{
+        const { title, elements } = req.body;
+        const canvasId = req.params.id;
+        const userId = req.user._id;
 
-// Real-time collaboration: leave a board/canvas
-const leaveCanvas = async (req, res) => {
-  // ...implementation...
-};
+        const updatedBoard = await boardService.updateBoard(canvasId, userId, { title, elements });
+        if (!updatedBoard) {
+            return res.status(404).json({ error: "Board not found or not authorized" });
+        }
+        res.json(updatedBoard);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to update board", details: err.message });
+    }
+}
 
-// Get active users on a board/canvas
-const getActiveUsers = async (req, res) => {
-  // ...implementation...
-};
 
 module.exports = {
   createCanvas,
@@ -127,8 +126,5 @@ module.exports = {
   loadCanvas,
   shareCanvas,
   unshareCanvas,
-  deleteCanvas,
-  joinCanvas,
-  leaveCanvas,
-  getActiveUsers,
+  deleteCanvas
 };

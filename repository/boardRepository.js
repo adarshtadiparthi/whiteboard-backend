@@ -19,7 +19,7 @@ const findBoardById = async (boardId, userId) => {
     _id: boardId,
     $or: [
       { owner: userId },
-      { shared: userId }
+      { "shared.userId": userId }
     ]
   });
 };
@@ -48,4 +48,18 @@ async function unshareBoardWithUser(boardId, ownerId, sharedWith) {
   );
 };
 
-module.exports = { findBoardsForUser, create, findBoardById, deleteBoardById, shareBoardWithUser, unshareBoardWithUser };
+async function updateBoardById(boardId, userId, updateData) {
+    return Board.findOneAndUpdate(
+        {
+            _id: boardId,
+            $or: [
+                { owner: userId },
+                { "shared.userId": userId }
+            ]
+        },
+        { $set: updateData },
+        { new: true }
+    );
+}
+
+module.exports = { findBoardsForUser, create, findBoardById, deleteBoardById, shareBoardWithUser, unshareBoardWithUser, updateBoardById };
