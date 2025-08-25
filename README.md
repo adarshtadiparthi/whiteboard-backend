@@ -1,7 +1,3 @@
-Perfect 👍 thanks for pointing me back to the screenshot. I’ll carefully reconstruct your **codebase structure** from the photo and generate a README tailored to it.
-
----
-
 # Collaborative Whiteboard Backend
 
 ## Overview
